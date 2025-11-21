@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: |
           BUILD_CMD="cargo"
-          if [ "${{ matrix.use_cross }}" == "true" ]; then
+          if [ '${{ matrix.use_cross }}' = 'true' ]; then
             BUILD_CMD="cross"
           fi
           $BUILD_CMD build --workspace --release --target ${{ matrix.target }}
