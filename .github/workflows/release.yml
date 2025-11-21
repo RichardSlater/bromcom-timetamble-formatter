@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build artifacts (${ { matrix.name }})
+    name: Build artifacts (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -42,22 +42,34 @@ jobs:
       - name: Build (release)
         run: cargo build --workspace --release
 
-      - name: Package artifact
+      - name: Prepare release dir (POSIX)
+        if: matrix.archive_ext != 'zip'
         run: |
           mkdir -p release
-          BIN=target/release/${{ matrix.bin_name }}
-          if [ ! -f "$BIN" ]; then echo "Binary not found: $BIN"; ls -la target/release || true; exit 1; fi
+          BIN="target/release/${{ matrix.bin_name }}"
+          if [ ! -f "$BIN" ]; then echo "Binary not found: $BIN"; ls -la target/release; exit 1; fi
           cp "$BIN" release/ || true
-          cp README.md release/ || true
-          cp LICENSE release/ || true
+          cp README.md release/
+          cp LICENSE release/
           cd release
           ART_NAME="timetable-cli-${{ github.ref_name }}-${{ matrix.name }}.${{ matrix.archive_ext }}"
-          if [[ "${{ matrix.archive_ext }}" == "zip" ]]; then
-            powershell -Command "Compress-Archive -Path * -DestinationPath $ART_NAME"
-          else
-            tar -czf "$ART_NAME" *
-          fi
+          tar -czf "$ART_NAME" *
           ls -la
+
+      - name: Prepare release dir (Windows)
+        if: matrix.archive_ext == 'zip'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release -Force | Out-Null
+          $BIN = "target/release/${{ matrix.bin_name }}"
+          if (-not (Test-Path $BIN)) { Write-Host "Binary not found: $BIN"; Get-ChildItem target/release -Force; exit 1 }
+          Copy-Item $BIN -Destination release -Force
+          Copy-Item README.md -Destination release -Force -ErrorAction SilentlyContinue
+          Copy-Item LICENSE -Destination release -Force -ErrorAction SilentlyContinue
+          Set-Location release
+          $ART_NAME = "timetable-cli-${{ github.ref_name }}-${{ matrix.name }}.${{ matrix.archive_ext }}"
+          Compress-Archive -Path * -DestinationPath $ART_NAME
+          Get-ChildItem -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
