@@ -17,14 +17,22 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux-x86_64
+            target: x86_64-unknown-linux-gnu
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+          - os: ubuntu-latest
+            name: linux-riscv64
+            target: riscv64gc-unknown-linux-gnu
             archive_ext: tar.gz
             bin_name: timetable_cli
           - os: macos-latest
             name: macos-x86_64
+            target: x86_64-apple-darwin
             archive_ext: tar.gz
             bin_name: timetable_cli
           - os: windows-latest
             name: windows-x86_64
+            target: x86_64-pc-windows-msvc
             archive_ext: zip
             bin_name: timetable_cli.exe
 
@@ -32,22 +40,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies (Linux RISC-V)
+        if: matrix.target == 'riscv64gc-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu
+
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          target: ${{ matrix.target }}
           profile: minimal
           override: true
 
       - name: Build (release)
-        run: cargo build --workspace --release
+        run: cargo build --workspace --release --target ${{ matrix.target }}
 
       - name: Prepare release dir (POSIX)
         if: matrix.archive_ext != 'zip'
         run: |
           mkdir -p release
-          BIN="target/release/${{ matrix.bin_name }}"
-          if [ ! -f "$BIN" ]; then echo "Binary not found: $BIN"; ls -la target/release; exit 1; fi
+          BIN="target/${{ matrix.target }}/release/${{ matrix.bin_name }}"
+          if [ ! -f "$BIN" ]; then echo "Binary not found: $BIN"; ls -la target/${{ matrix.target }}/release; exit 1; fi
           cp "$BIN" release/ || true
           cp README.md release/
           cp LICENSE release/
@@ -61,8 +76,8 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path release -Force | Out-Null
-          $BIN = "target/release/${{ matrix.bin_name }}"
-          if (-not (Test-Path $BIN)) { Write-Host "Binary not found: $BIN"; Get-ChildItem target/release -Force; exit 1 }
+          $BIN = "target/${{ matrix.target }}/release/${{ matrix.bin_name }}"
+          if (-not (Test-Path $BIN)) { Write-Host "Binary not found: $BIN"; Get-ChildItem target/${{ matrix.target }}/release -Force; exit 1 }
           Copy-Item $BIN -Destination release -Force
           Copy-Item README.md -Destination release -Force -ErrorAction SilentlyContinue
           Copy-Item LICENSE -Destination release -Force -ErrorAction SilentlyContinue
