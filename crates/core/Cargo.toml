@@ -9,6 +9,6 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 svg = "0.14"
 roxmltree = "0.19"
-thiserror = "1.0"
+thiserror = "2.0"
 regex = "1.10"
 chrono = "0.4"
