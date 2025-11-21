@@ -3,7 +3,6 @@ use crate::parser::Week;
 use std::fs;
 use std::path::Path;
 use svg::node::element::{Group, Rectangle, Text};
-use svg::node::Text as TextNode;
 use svg::Document;
 use thiserror::Error;
 
@@ -196,20 +195,18 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
         String::from("Student Timetable")
     };
 
-    let text_student = Text::new()
+    let text_student = Text::new(student_info.as_str())
         .set("x", left_margin)
         .set("y", 30)
-        .set("class", "header-text")
-        .add(TextNode::new(student_info.as_str()));
+        .set("class", "header-text");
     group = group.add(text_student);
 
     // Add week label at top center
-    let text_week = Text::new()
+    let text_week = Text::new(week.week_name.as_str())
         .set("x", width / 2)
         .set("y", 30)
         .set("text-anchor", "middle")
-        .set("class", "week-label")
-        .add(TextNode::new(week.week_name.as_str()));
+        .set("class", "week-label");
     group = group.add(text_week);
 
     // Draw day headers (Monday-Friday)
@@ -217,12 +214,11 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
     for (i, day) in days.iter().enumerate() {
         let x = left_margin + (i as i32 * col_width) + (col_width / 2);
         let y = top_margin - 15;
-        let text = Text::new()
+        let text = Text::new(*day)
             .set("x", x)
             .set("y", y)
             .set("text-anchor", "middle")
-            .set("class", "header-text")
-            .add(TextNode::new(*day));
+            .set("class", "header-text");
         group = group.add(text);
     }
 
@@ -242,12 +238,11 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
         }
 
         // Draw period label on left
-        let text_period = Text::new()
+        let text_period = Text::new(*label)
             .set("x", 30)
             .set("y", y + (row_height / 2))
             .set("dominant-baseline", "middle")
-            .set("class", "period-label")
-            .add(TextNode::new(*label));
+            .set("class", "period-label");
         group = group.add(text_period);
 
         // Draw break after L2 (period_idx 2)
@@ -266,13 +261,12 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
                 .set("stroke-width", 1);
             group = group.add(rect_break);
 
-            let text_break = Text::new()
+            let text_break = Text::new("Break (11:00 - 11:30)")
                 .set("x", left_margin + (total_content_width / 2))
                 .set("y", break_y + ((break_height - (cell_padding * 2)) / 2) + 1)
                 .set("text-anchor", "middle")
                 .set("dominant-baseline", "middle")
-                .set("class", "detail")
-                .add(TextNode::new("Break (11:00 - 11:30)"));
+                .set("class", "detail");
             group = group.add(text_break);
         }
 
@@ -292,13 +286,12 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
                 .set("stroke-width", 1);
             group = group.add(rect_lunch);
 
-            let text_lunch = Text::new()
+            let text_lunch = Text::new("Lunch (13:30 - 14:10)")
                 .set("x", left_margin + (total_content_width / 2))
                 .set("y", lunch_y + (lunch_height / 2) - 2)
                 .set("text-anchor", "middle")
                 .set("dominant-baseline", "middle")
-                .set("class", "detail")
-                .add(TextNode::new("Lunch (13:30 - 14:10)"));
+                .set("class", "detail");
             group = group.add(text_lunch);
         }
     }
@@ -383,43 +376,39 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
 
             // Render each line
             for (line_idx, line) in lines.iter().enumerate() {
-                let text_subject_line = Text::new()
+                let text_subject_line = Text::new(line.as_str())
                     .set("x", x + cell_padding + 5)
                     .set("y", y + cell_padding + 12 + (line_idx as i32 * 11))
                     .set("class", "subject")
-                    .set("font-weight", "bold")
-                    .add(TextNode::new(line.as_str()));
+                    .set("font-weight", "bold");
                 group = group.add(text_subject_line);
             }
         } else {
             // Single line subject
-            let text_subject = Text::new()
+            let text_subject = Text::new(lesson.subject.as_str())
                 .set("x", x + cell_padding + 5)
                 .set("y", y + cell_padding + 14)
                 .set("class", "subject")
-                .set("font-weight", "bold")
-                .add(TextNode::new(lesson.subject.as_str()));
+                .set("font-weight", "bold");
             group = group.add(text_subject);
         }
 
         // Text: Room code (above teacher) - only if not Unknown
         if lesson.room != "Unknown" {
-            let text_room = Text::new()
+            let text_room = Text::new(lesson.room.as_str())
                 .set("x", x + cell_padding + 5)
                 .set("y", y + row_height - cell_padding - 22)
-                .set("class", "detail")
-                .add(TextNode::new(lesson.room.as_str()));
+                .set("class", "detail");
             group = group.add(text_room);
         }
 
         // Text: Teacher (bottom, smaller text) - only if not Unknown
         if lesson.teacher != "Unknown" {
-            let text_teacher = Text::new()
+            let text_teacher = Text::new(lesson.teacher.as_str())
                 .set("x", x + cell_padding + 5)
                 .set("y", y + row_height - cell_padding - 8)
                 .set("class", "detail")
-                .set("font-size", "9px")
-                .add(TextNode::new(lesson.teacher.as_str()));
+                .set("font-size", "9px");
             group = group.add(text_teacher);
         }
 
@@ -436,7 +425,7 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
         let class_x = label_x + (label_width / 2) - 2;
         let class_y = y + (row_height / 2);
 
-        let text_class = Text::new()
+        let text_class = Text::new(label_text)
             .set("x", class_x)
             .set("y", class_y)
             .set("transform", format!("rotate(90 {} {})", class_x, class_y))
@@ -448,19 +437,17 @@ fn draw_timetable_grid(week: &Week, config: &Config, width: i32, height: i32) ->
             )
             .set("font-size", "20px")
             .set("font-weight", "600")
-            .set("fill", fg_color)
-            .add(TextNode::new(label_text));
+            .set("fill", fg_color);
         group = group.add(text_class);
     }
 
     // Add update date footer
     let update_date = chrono::Local::now().format("%d %B %Y").to_string();
-    let text_update = Text::new()
+    let text_update = Text::new(format!("Updated: {}", update_date).as_str())
         .set("x", width - right_margin)
         .set("y", height - 10)
         .set("text-anchor", "end")
-        .set("class", "detail")
-        .add(TextNode::new(format!("Updated: {}", update_date).as_str()));
+        .set("class", "detail");
     group = group.add(text_update);
 
     group
