@@ -164,3 +164,44 @@ When working on a TODO item:
 3. Update this file to mark item as "In Progress" with issue link
 4. Submit PR when complete
 5. Move item to "Completed" section with PR link
+
+## Repository Gaps Identified
+
+The following items were identified during a repository review and should be considered for inclusion in the project's roadmap or tracked as separate issues:
+
+### Tests & Fixtures
+
+- Add integration/end-to-end tests that exercise the full pipeline (PDF → parsed data → SVG output).
+- Create minimal synthetic PDF fixtures for deterministic parser testing and regression tests.
+- Add golden-file SVG tests to validate rendering output across changes.
+
+### Example Outputs
+
+- Include example generated SVGs in `examples/` or `output/examples/` for visual verification and documentation.
+
+### CI / Security Tooling
+
+- Add `deny.toml` and configure `cargo-deny` to enforce license and security policies.
+- Add dependency and vulnerability scanning for CI (e.g., cargo-audit or Snyk integration).
+
+### Developer Tooling
+
+- Add `.editorconfig` for consistent editor settings across contributors.
+- Add `cliff.toml` (or similar) for automated changelog generation from Conventional Commits.
+
+### Distribution / Environment
+
+- Provide a `Dockerfile` or containerized environment to ensure consistent execution for CI and local testing.
+- Provide platform-specific install or packaging notes for easy distribution (optional installers, brew/homebrew, cargo-binstall guidance).
+
+### Performance & Observability
+
+- Add benchmark scripts to capture PDF parsing and SVG rendering performance over time.
+- Add CI step or badge for test coverage and optionally performance regressions.
+
+### Documentation
+
+- Add example outputs and screenshots to the docs and the GitHub Pages site to demonstrate expected results.
+- Expand testing strategy section with concrete test fixture sources and commands to run integrations.
+
+These items map closely to `docs/TODO.md` priorities and should be triaged into issues for tracking and assignment.
