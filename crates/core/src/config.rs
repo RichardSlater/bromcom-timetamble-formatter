@@ -253,7 +253,7 @@ impl Config {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = Config::load(Path::new("config.toml"))?;
     /// let mut weeks = parse_pdf(Path::new("input/timetable.pdf"))?;
-    /// 
+    ///
     /// config.apply_overrides(&mut weeks);
     /// # Ok(())
     /// # }

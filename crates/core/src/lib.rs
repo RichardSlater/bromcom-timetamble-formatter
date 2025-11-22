@@ -33,7 +33,7 @@
 //!     // Build highlights for departments used in this week
 //!     let mut highlights = Vec::new();
 //!     let mut seen_ids = HashSet::new();
-//!     
+//!
 //!     for lesson in &week.lessons {
 //!         if let Some(mapping) = config.get_style_for_room(&lesson.room) {
 //!             if seen_ids.insert(mapping.map_id.clone()) {
@@ -44,10 +44,10 @@
 //!             }
 //!         }
 //!     }
-//!     
+//!
 //!     // Process school map with highlights
 //!     let map_svg = process_map(Path::new("resources/map.svg"), &highlights)?;
-//!     
+//!
 //!     // Render to output file
 //!     let output_path = format!("output/week_{}.svg", i + 1);
 //!     render_timetable(week, &config, &map_svg, Path::new(&output_path))?;

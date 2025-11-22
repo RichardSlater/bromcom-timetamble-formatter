@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <title>Sample School Map</title>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f5f5f5"/>
+
+  <!-- Main Building -->
+  <rect x="50" y="50" width="700" height="500" fill="#e8e8e8" stroke="#333" stroke-width="2"/>
+
+  <!-- Maths Department -->
+  <g id="Maths_Rooms" data-name="Maths_Rooms">
+    <rect x="100" y="100" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="175" y="145" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Mathematics</text>
+    <text x="175" y="165" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">MA1 - MA5</text>
+  </g>
+
+  <!-- Science Department -->
+  <g id="Science_Rooms" data-name="Science_Rooms">
+    <rect x="300" y="100" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="375" y="145" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Science</text>
+    <text x="375" y="165" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">SC1 - SC8</text>
+  </g>
+
+  <!-- English/Humanities Department -->
+  <g id="Humanities_Rooms" data-name="Humanities_Rooms">
+    <rect x="500" y="100" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="575" y="145" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Humanities</text>
+    <text x="575" y="165" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">HU1 - HU9</text>
+  </g>
+
+  <!-- Languages Department -->
+  <g id="Languages_Rooms" data-name="Languages_Rooms">
+    <rect x="100" y="250" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="175" y="295" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Languages</text>
+    <text x="175" y="315" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">LA1 - LA6</text>
+  </g>
+
+  <!-- ICT/Computing Department -->
+  <g id="ICT_Rooms" data-name="ICT_Rooms">
+    <rect x="300" y="250" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="375" y="295" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">ICT/Computing</text>
+    <text x="375" y="315" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">IC1 - IC4</text>
+  </g>
+
+  <!-- Art Department -->
+  <g id="Art_Rooms" data-name="Art_Rooms">
+    <rect x="500" y="250" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="575" y="295" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Art</text>
+    <text x="575" y="315" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">AR1 - AR3</text>
+  </g>
+
+  <!-- PE/Sports Department -->
+  <g id="PE_Rooms" data-name="PE_Rooms">
+    <rect x="100" y="400" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="175" y="445" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">PE/Sports</text>
+    <text x="175" y="465" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">Gym, Field</text>
+  </g>
+
+  <!-- Music Department -->
+  <g id="Music_Rooms" data-name="Music_Rooms">
+    <rect x="300" y="400" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="375" y="445" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Music</text>
+    <text x="375" y="465" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">MU1 - MU2</text>
+  </g>
+
+  <!-- Drama/Theatre -->
+  <g id="Drama_Rooms" data-name="Drama_Rooms">
+    <rect x="500" y="400" width="150" height="100" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    <text x="575" y="445" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Drama</text>
+    <text x="575" y="465" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">DR1 - DR2</text>
+  </g>
+
+  <!-- Corridors/Paths -->
+  <line x1="75" y1="225" x2="725" y2="225" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="75" y1="375" x2="725" y2="375" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="275" y1="75" x2="275" y2="525" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="475" y1="75" x2="475" y2="525" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+
+  <!-- Legend -->
+  <text x="400" y="580" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold" fill="#333">School Floor Plan</text>
+</svg>

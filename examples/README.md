@@ -81,13 +81,13 @@ Bromcom exports timetables as PDFs with the following characteristics:
 Bromcom PDFs use a non-standard character encoding with a +29 offset. The parser automatically handles this:
 
 ```rust
-// Parser automatically decodes: 
+// Parser automatically decodes:
 // PDF byte 'a' + 29 → actual character
 fn decode_bromcom_text(raw: &str) -> String {
     raw.chars()
         .map(|c| {
             let code = c as u32;
-            if code >= 29 { char::from_u32(code - 29).unwrap_or(c) } 
+            if code >= 29 { char::from_u32(code - 29).unwrap_or(c) }
             else { c }
         })
         .collect()
@@ -145,13 +145,13 @@ Your school map SVG must:
     <rect x="100" y="100" width="150" height="100" fill="#ddd" />
     <text x="175" y="155">Maths</text>
   </g>
-  
+
   <!-- Science Department -->
   <g id="Science_Rooms" data-name="Science">
     <rect x="300" y="100" width="150" height="100" fill="#ddd" />
     <text x="375" y="155">Science</text>
   </g>
-  
+
   <!-- Add more departments... -->
 </svg>
 ```
@@ -348,13 +348,13 @@ Process multiple student timetables:
 for pdf in input/*.pdf; do
   student_name=$(basename "$pdf" .pdf)
   mkdir -p "output/$student_name"
-  
+
   ./timetable_cli \
     --input "$pdf" \
     --config config.toml \
     --map resources/SchoolMap.svg \
     --output "output/$student_name"
-  
+
   echo "Processed: $student_name"
 done
 ```

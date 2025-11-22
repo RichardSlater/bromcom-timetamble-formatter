@@ -295,6 +295,12 @@ cargo fmt --check
 - Test with various SVG editors (Inkscape, Adobe Illustrator)
 - Handle missing map IDs gracefully (log warning, don't crash)
 
+### For Running Python
+
+- Use the PyLance MCP server
+- Use a virtual environment for dependencies
+- Ensure compatibility with Python 3.12+
+
 ## Dependencies to Respect
 
 - **lopdf**: PDF structure may change between versions - pin version

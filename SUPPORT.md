@@ -19,4 +19,4 @@ Thanks for using Bromcom Timetable Formatter! Here are the best ways to get help
 ## Response Expectations
 - Issues and discussions are reviewed on a best-effort basis. For urgent fixes (e.g., CI failing on `main`), mention `@RichardSlater` directly in the issue.
 
-We appreciate your patience and contributions! 
+We appreciate your patience and contributions!

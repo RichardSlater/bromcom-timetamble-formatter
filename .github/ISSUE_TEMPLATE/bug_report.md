@@ -9,9 +9,9 @@ labels: bug
 _Please describe the problem and what you expected to happen._
 
 ## Reproduction Steps
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Sample Inputs (if possible)
 - PDF snippet or anonymized timetable
