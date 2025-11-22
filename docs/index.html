@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bromcom Timetable Formatter - Transform PDF Timetables into Visual Schedules</title>
+    <meta name="description" content="Parse Bromcom PDF timetables and generate beautiful, color-coded SVG visualizations with integrated school maps.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="container">
+            <h1>Bromcom Timetable Formatter</h1>
+            <p class="tagline">Transform PDF timetables into beautiful, color-coded visual schedules</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/RichardSlater/bromcom-timetable-formatter" class="btn btn-primary">View on GitHub</a>
+                <a href="api/timetable_core/index.html" class="btn btn-secondary">API Documentation</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="features">
+            <div class="container">
+                <h2>Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>PDF Parsing</h3>
+                        <p>Extracts lessons, rooms, teachers, and subjects from Bromcom PDF timetables with precise coordinate detection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Color-Coded Output</h3>
+                        <p>Automatically applies department colors to room codes based on configurable mappings (Maths, Science, Humanities, etc.).</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <h3>School Map Integration</h3>
+                        <p>Highlights department locations on your school map SVG, showing where each class takes place.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚙️</div>
+                        <h3>Configurable</h3>
+                        <p>TOML-based configuration for room mappings, colors, and lesson overrides. Easy to customize for your school.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Print-Ready</h3>
+                        <p>Generates A4-sized SVG output (794×1123px) optimized for printing and digital viewing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🦀</div>
+                        <h3>Fast & Reliable</h3>
+                        <p>Built with Rust for speed, safety, and cross-platform compatibility (Linux, macOS, Windows).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo">
+            <div class="container">
+                <h2>Example Output</h2>
+                <p class="section-intro">See how a typical Bromcom PDF timetable is transformed into a visual schedule:</p>
+                <div class="demo-comparison">
+                    <div class="demo-item">
+                        <h3>Before: Bromcom PDF</h3>
+                        <div class="demo-placeholder">
+                            <p>📄 Standard PDF timetable from Bromcom</p>
+                        </div>
+                    </div>
+                    <div class="demo-arrow">→</div>
+                    <div class="demo-item">
+                        <h3>After: Formatted SVG</h3>
+                        <div class="demo-placeholder">
+                            <p>🎨 Color-coded timetable + school map</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="installation">
+            <div class="container">
+                <h2>Installation</h2>
+                <div class="install-methods">
+                    <div class="install-card">
+                        <h3>From Source</h3>
+                        <pre><code># Clone the repository
+git clone https://github.com/RichardSlater/bromcom-timetable-formatter.git
+cd bromcom-timetable-formatter
+
+# Build with Cargo
+cargo build --release
+
+# Binary will be in target/release/timetable_cli</code></pre>
+                    </div>
+                    <div class="install-card">
+                        <h3>From GitHub Releases</h3>
+                        <pre><code># Download the latest release for your platform
+# Visit: https://github.com/RichardSlater/bromcom-timetable-formatter/releases
+
+# Extract and run
+./timetable_cli --help</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="usage">
+            <div class="container">
+                <h2>Quick Start</h2>
+                <div class="usage-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Prepare Your Files</h3>
+                            <p>You'll need:</p>
+                            <ul>
+                                <li>Bromcom PDF timetable</li>
+                                <li>School map SVG (with department IDs)</li>
+                                <li>Configuration file (config.toml)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Configure Room Mappings</h3>
+                            <pre><code>[[mappings]]
+prefix = "MA"
+bg_color = "#fcdcd8"
+fg_color = "#e8a490"
+map_id = "Maths_Rooms"
+label = "Maths"</code></pre>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Run the Formatter</h3>
+                            <pre><code>./timetable_cli \
+  --input timetable.pdf \
+  --config config.toml \
+  --map school_map.svg \
+  --output output/</code></pre>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>View Your Timetable</h3>
+                            <p>Open the generated SVG in your browser or print it directly. Each week's timetable will be saved separately.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="documentation">
+            <div class="container">
+                <h2>Documentation</h2>
+                <div class="doc-grid">
+                    <a href="api/timetable_core/index.html" class="doc-card">
+                        <h3>📚 API Documentation</h3>
+                        <p>Rust API documentation generated with rustdoc. Explore the core library and CLI.</p>
+                    </a>
+                    <a href="https://github.com/RichardSlater/bromcom-timetable-formatter/blob/main/README.md" class="doc-card">
+                        <h3>📖 User Guide</h3>
+                        <p>Comprehensive README with setup instructions, configuration examples, and troubleshooting.</p>
+                    </a>
+                    <a href="https://github.com/RichardSlater/bromcom-timetable-formatter/blob/main/ARCHITECTURE.md" class="doc-card">
+                        <h3>🏗️ Architecture</h3>
+                        <p>Technical overview of the project structure, data flow, and design decisions.</p>
+                    </a>
+                    <a href="https://github.com/RichardSlater/bromcom-timetable-formatter/blob/main/CONTRIBUTING.md" class="doc-card">
+                        <h3>🤝 Contributing</h3>
+                        <p>Guidelines for contributing code, reporting issues, and submitting pull requests.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="tech-stack">
+            <div class="container">
+                <h2>Built With</h2>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <strong>lopdf</strong>
+                        <span>PDF parsing and text extraction</span>
+                    </div>
+                    <div class="tech-item">
+                        <strong>svg</strong>
+                        <span>Programmatic SVG generation</span>
+                    </div>
+                    <div class="tech-item">
+                        <strong>roxmltree</strong>
+                        <span>XML/SVG parsing and manipulation</span>
+                    </div>
+                    <div class="tech-item">
+                        <strong>serde & toml</strong>
+                        <span>Configuration management</span>
+                    </div>
+                    <div class="tech-item">
+                        <strong>clap</strong>
+                        <span>CLI argument parsing</span>
+                    </div>
+                    <div class="tech-item">
+                        <strong>regex</strong>
+                        <span>Pattern matching for parsing</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Bromcom Timetable Formatter | <a href="https://github.com/RichardSlater/bromcom-timetable-formatter/blob/main/LICENSE">MIT License</a></p>
+            <p>
+                <a href="https://github.com/RichardSlater/bromcom-timetable-formatter">GitHub</a> •
+                <a href="https://github.com/RichardSlater/bromcom-timetable-formatter/issues">Issues</a> •
+                <a href="api/timetable_core/index.html">API Docs</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
