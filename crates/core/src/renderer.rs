@@ -176,35 +176,32 @@ pub fn render_timetable(
         svg_string.truncate(svg_string.len() - 6);
     }
 
-    // Inject the map
-    // We place it at the bottom.
-    // We assume map_content is a valid <svg> element.
-    // We wrap it in a nested <svg> to constrain it to the available space.
+    // Inject the map if provided (map_content non-empty). If empty, skip embedding.
+    if !map_content.trim().is_empty() {
+        // We place it at the bottom.
+        let map_y = timetable_height + 20;
+        let map_area_height = height - map_y - 20; // Leave 20px margin at bottom
 
-    let map_y = timetable_height + 20;
-    let map_area_height = height - map_y - 20; // Leave 20px margin at bottom
+        svg_string.push_str(&format!(
+            "<svg x=\"0\" y=\"{}\" width=\"{}\" height=\"{}\">",
+            map_y, width, map_area_height
+        ));
 
-    svg_string.push_str(&format!(
-        "<svg x=\"0\" y=\"{}\" width=\"{}\" height=\"{}\">",
-        map_y, width, map_area_height
-    ));
-
-    // We need to ensure the map fits. We might need to scale it.
-    // For now, we just dump it.
-    // Strip <?xml ... ?> if exists
-    let clean_map = map_content.trim_start_matches(|c| c != '<');
-    let clean_map = if clean_map.starts_with("<?xml") {
-        if let Some(idx) = clean_map.find("?>") {
-            &clean_map[idx + 2..]
+        // Strip <?xml ... ?> if exists
+        let clean_map = map_content.trim_start_matches(|c| c != '<');
+        let clean_map = if clean_map.starts_with("<?xml") {
+            if let Some(idx) = clean_map.find("?>") {
+                &clean_map[idx + 2..]
+            } else {
+                clean_map
+            }
         } else {
             clean_map
-        }
-    } else {
-        clean_map
-    };
+        };
 
-    svg_string.push_str(clean_map);
-    svg_string.push_str("</svg>");
+        svg_string.push_str(clean_map);
+        svg_string.push_str("</svg>");
+    }
 
     // Close the root svg
     svg_string.push_str("</svg>");

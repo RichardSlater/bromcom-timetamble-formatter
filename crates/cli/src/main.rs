@@ -20,7 +20,7 @@ struct Cli {
 
     /// Path to the map SVG file
     #[arg(short, long)]
-    map: PathBuf,
+    map: Option<PathBuf>,
 
     /// Output directory for generated SVGs
     #[arg(short, long)]
@@ -111,8 +111,13 @@ fn main() -> Result<()> {
             }
         }
 
-        // 4. Process Map
-        let map_svg = process_map(&cli.map, &highlights).context("Failed to process map")?;
+        // 4. Process Map (optional)
+        let map_svg = if let Some(map_path) = &cli.map {
+            process_map(map_path, &highlights).context("Failed to process map")?
+        } else {
+            // No map provided — renderer will skip embedding
+            String::new()
+        };
 
         // 5. Render
         // Use a safe filename

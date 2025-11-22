@@ -81,6 +81,9 @@ To update the brochure site:
 5. GitHub Actions will automatically rebuild and deploy
 6. The landing page ships with a dark-mode toggle that relies on shared CSS variables—reuse the existing custom properties so new sections inherit both light and dark palettes automatically.
 
+Dark palette note:
+- The dark theme variables are centralized in `:root` as `--dark-*` custom properties. Both the explicit `data-theme="dark"` selector and the `@media (prefers-color-scheme: dark)` rule alias the active CSS variables to these `--dark-*` values. This avoids duplicated hex literals and keeps the dark palette a single source of truth.
+
 ## Updating API Documentation
 
 API documentation is automatically generated from Rust doc comments in the source code:
