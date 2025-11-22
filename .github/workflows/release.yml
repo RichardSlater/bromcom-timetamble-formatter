@@ -128,11 +128,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-riscv64-linux-gnu
 
-      - name: Install Cross
+      - name: Install cargo-binstall
         if: matrix.use_cross
         uses: cargo-bins/cargo-binstall@v1.16.1
-        with:
-          crate: cross
+
+      - name: Install cross
+        if: matrix.use_cross
+        run: cargo binstall --no-confirm cross
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
