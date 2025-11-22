@@ -7,36 +7,25 @@ names with clearly fictional alternatives. It uses pikepdf to manipulate PDF
 content streams.
 
 Usage:
-    python3 scripts/anonymize_pdf.py input/original.pdf input/anonymized.pdf \
-    args = parse_args()
-    base_dir = Path(args.base_dir).resolve()
+    python3 scripts/anonymize_pdf.py input/original.pdf input/anonymized.pdf
 
-    if not base_dir.exists():
-        print(f"Error: Base directory does not exist: {base_dir}")
-        sys.exit(1)
+The script restricts input/output paths to a repository base directory by
+default. The base directory is auto-detected by searching upward for a
+.git directory or a 'Cargo.toml' file; a custom `--base-dir` may be provided.
+"""
 
-    try:
-        input_path = sanitize_user_path(args.input_pdf, base_dir)
-        output_path = sanitize_user_path(args.output_pdf, base_dir)
-    except ValueError as exc:
-        print(f"Error: {exc}")
-        sys.exit(1)
+import argparse
+import sys
+import re
+from pathlib import Path
+from collections import defaultdict
+from typing import Dict, Set, Optional
 
-    if not input_path.exists():
-        print(f"Error: Input file not found: {input_path}")
-        sys.exit(1)
-
-    # Create output directory if it doesn't exist
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        anonymize_pdf(input_path, output_path)
-    except Exception as e:
-        print(f"Error during anonymization: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
-
+try:
+    import pikepdf
+except ImportError:
+    print("Error: pikepdf is required. Install it with: pip install pikepdf")
+    sys.exit(1)
 
 # Test fixture name generators
 TEACHER_FIXTURES = [
@@ -44,6 +33,16 @@ TEACHER_FIXTURES = [
     "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa",
     "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey",
     "X-ray", "Yankee", "Zulu"
+]
+
+FIRST_NAMES = [
+    "Test", "Sample", "Demo", "Mock", "Fixture", "Example", "Placeholder",
+    "Specimen", "Model", "Instance", "Case", "Trial"
+]
+
+LAST_NAMES = [
+    "Data", "User", "Person", "Student", "Subject", "Entity", "Record",
+    "Entry", "Item", "Object", "Element", "Unit"
 ]
 
 FIRST_NAMES = [
@@ -367,7 +366,19 @@ def extract_text_from_pdf(pdf: pikepdf.Pdf) -> str:
 
 
 def get_default_base_dir() -> Path:
-    """Return the repository root (default base directory for sanitized paths)."""
+    """Return a reasonable repository root by searching upward from this file.
+
+    The function walks parent directories looking for a VCS marker ('.git') or
+    a repository marker like 'Cargo.toml'. If none is found, it falls back to
+    the parent of this script.
+    """
+
+    candidate = Path(__file__).resolve()
+    for parent in [candidate] + list(candidate.parents):
+        if (parent / '.git').exists() or (parent / 'Cargo.toml').exists():
+            return parent
+
+    # Fallback: one level up from scripts/ if nothing obvious found
     return Path(__file__).resolve().parents[1]
 
 
@@ -420,6 +431,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
 
 
 def anonymize_pdf(input_path: Path, output_path: Path) -> None:
