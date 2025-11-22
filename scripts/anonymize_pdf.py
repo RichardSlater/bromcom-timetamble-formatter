@@ -15,6 +15,7 @@ default. The base directory is auto-detected by searching upward for a
 """
 
 import argparse
+import errno
 import sys
 import re
 from pathlib import Path
@@ -430,7 +431,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--base-dir",
-        default=str(get_default_base_dir()),
+        default=None,
         help=(
             "Trusted base directory that user-supplied paths must reside in. "
             "Defaults to the repository root."
@@ -507,12 +508,16 @@ def main():
     # Determine canonical repository root directory (trusted source)
     repo_root = get_default_base_dir()
 
-    # Validate and sanitize the user-provided base_dir using the trusted repo_root
-    try:
-        base_dir = sanitize_user_path(args.base_dir, repo_root)
-    except ValueError as e:
-        print(f"Error: Invalid --base-dir: {e}")
-        sys.exit(1)
+    # Use repo_root as base_dir if --base-dir not provided, otherwise validate it
+    if args.base_dir is None:
+        base_dir = repo_root
+    else:
+        # Validate and sanitize the user-provided base_dir using the trusted repo_root
+        try:
+            base_dir = sanitize_user_path(args.base_dir, repo_root)
+        except ValueError as e:
+            print(f"Error: Invalid --base-dir: {e}")
+            sys.exit(1)
 
     # Now sanitize input and output paths using the validated base_dir
     try:
