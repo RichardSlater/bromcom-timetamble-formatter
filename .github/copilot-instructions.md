@@ -8,6 +8,10 @@ This is a Rust workspace project that parses Bromcom PDF timetables and generate
 
 GPG Signing is an absolute requirement, under not circumstances are you to disable code signing even if the signing fails, simply provide the command for the user to commit the files with GPG signing enabled.
 
+## Conventional Commits
+
+All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification (e.g., `feat: add map overlay`, `fix: correct renderer panic`). Ensure every commit message includes the proper type, optional scope, and succinct description so automated tooling can parse changelogs accurately.
+
 ## Architecture
 
 ### Workspace Structure
