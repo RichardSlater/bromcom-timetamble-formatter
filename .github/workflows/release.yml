@@ -212,10 +212,14 @@ jobs:
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${RELEASE_TAG}$" | head -n1 || true)
           if [ -n "$PREV_TAG" ]; then
             RANGE="$PREV_TAG..$RELEASE_TAG"
-            COMMITS=$(git log --pretty=format:'- %h %s — @%an' "$PREV_TAG..$RELEASE_TAG" || true)
+            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$PREV_TAG..$RELEASE_TAG" | \
+              sed -E 's/@([^<]+) <([^@]+)@users\.noreply\.github\.com>/@\2/g' | \
+              sed -E 's/@([^<]+) <[^>]+>/@\1/g' || true)
           else
             RANGE="$RELEASE_TAG"
-            COMMITS=$(git log --pretty=format:'- %h %s — @%an' "$RELEASE_TAG" -n 50 || true)
+            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$RELEASE_TAG" -n 50 | \
+              sed -E 's/@([^<]+) <([^@]+)@users\.noreply\.github\.com>/@\2/g' | \
+              sed -E 's/@([^<]+) <[^>]+>/@\1/g' || true)
           fi
           if [ -z "$COMMITS" ]; then
             COMMITS="(no commits found)"
