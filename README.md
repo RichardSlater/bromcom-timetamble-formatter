@@ -1,7 +1,7 @@
 # Bromcom Timetable Formatter
 
 [![CI](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/ci.yml)
-[![Release Workflow](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/release.yml)
+[![Release Workflow](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/release.yml/badge.svg?event=push)](https://github.com/RichardSlater/bromcom-timetable-formatter/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A small Rust workspace that parses Bromcom-produced PDF timetables and renders a printable A4 SVG-style weekly timetable, with a color-coded timetable grid and an embedded school map highlighting departments.
