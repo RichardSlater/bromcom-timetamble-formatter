@@ -533,13 +533,21 @@ def main():
         sys.exit(1)
 
     # Create output directory if it doesn't exist
+    # Ensure output directory is also within the validated base
+    output_dir = output_path.parent
     try:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_dir.resolve().relative_to(base_dir.resolve())
+    except ValueError:
+        print(f"Error: Output directory {output_dir} is outside the base directory")
+        sys.exit(1)
+
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        print(f"Error: Permission denied creating output directory: {output_path.parent}")
+        print(f"Error: Permission denied creating output directory: {output_dir}")
         sys.exit(1)
     except OSError as e:
-        print(f"Error: Cannot create output directory: {output_path.parent} ({e})")
+        print(f"Error: Cannot create output directory: {output_dir} ({e})")
         sys.exit(1)
 
     # Perform the anonymization with detailed error handling
