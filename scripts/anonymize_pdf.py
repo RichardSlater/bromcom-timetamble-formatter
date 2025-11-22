@@ -15,6 +15,7 @@ default. The base directory is auto-detected by searching upward for a
 """
 
 import argparse
+import errno
 import sys
 import re
 from pathlib import Path
@@ -401,6 +402,16 @@ def sanitize_user_path(raw_path: str, base_dir: Path) -> Path:
             f"Path '{resolved_candidate}' is outside the allowed base directory {resolved_base}"
         ) from exc
 
+    # Additional check: prevent symlink traversal outside base dir
+    for parent in resolved_candidate.parents:
+        # Only need to check ancestors down to resolved_base (inclusive)
+        if parent.is_symlink():
+            raise ValueError(
+                f"Symlink detected in path component: '{parent}'. Refusing to access '{resolved_candidate}'."
+            )
+        if parent == resolved_base:
+            break
+
     return resolved_candidate
 
 
@@ -420,7 +431,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--base-dir",
-        default=str(get_default_base_dir()),
+        default=None,
         help=(
             "Trusted base directory that user-supplied paths must reside in. "
             "Defaults to the repository root."
@@ -491,33 +502,83 @@ def anonymize_pdf(input_path: Path, output_path: Path) -> None:
 
 def main():
     """Main entry point for the script."""
-    if len(sys.argv) != 3:
-        print("Usage: python3 anonymize_pdf.py <input_pdf> <output_pdf>")
-        print()
-        print("Example:")
-        print("  python3 scripts/anonymize_pdf.py \\")
-        print("    input/original.pdf \\")
-        print("    input/Sample_Student_Timetable.pdf")
+    # Parse arguments using argparse for proper validation
+    args = parse_args()
+
+    # Determine canonical repository root directory (trusted source)
+    repo_root = get_default_base_dir()
+
+    # Use repo_root as base_dir if --base-dir not provided, otherwise validate it
+    if args.base_dir is None:
+        base_dir = repo_root
+    else:
+        # Validate and sanitize the user-provided base_dir using the trusted repo_root
+        try:
+            base_dir = sanitize_user_path(args.base_dir, repo_root)
+        except ValueError as e:
+            print(f"Error: Invalid --base-dir: {e}")
+            sys.exit(1)
+
+    # Now sanitize input and output paths using the validated base_dir
+    try:
+        input_path = sanitize_user_path(args.input_pdf, base_dir)
+        output_path = sanitize_user_path(args.output_pdf, base_dir)
+    except ValueError as e:
+        print(f"Error: {e}")
         sys.exit(1)
 
-    input_path = Path(sys.argv[1])
-    output_path = Path(sys.argv[2])
-
+    # Verify input file exists and is readable
     if not input_path.exists():
         print(f"Error: Input file not found: {input_path}")
         sys.exit(1)
 
-    # Create output directory if it doesn't exist
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if not input_path.is_file():
+        print(f"Error: Input path is not a file: {input_path}")
+        sys.exit(1)
 
     try:
+        with open(input_path, 'rb') as f:
+            pass  # Just verify we can open it
+    except PermissionError:
+        print(f"Error: Permission denied reading input file: {input_path}")
+        sys.exit(1)
+    except OSError as e:
+        print(f"Error: Cannot access input file: {input_path} ({e})")
+        sys.exit(1)
+
+    # Create output directory if it doesn't exist
+    resolved_output_parent = output_path.parent.resolve()
+    try:
+        resolved_output_parent.relative_to(base_dir)
+    except ValueError:
+        print(f"Error: Output directory '{resolved_output_parent}' is outside the allowed base directory '{base_dir}'")
+        sys.exit(1)
+    # Output directory already validated by sanitize_user_path(); create if needed
+    try:
+        resolved_output_parent.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        print(f"Error: Permission denied creating output directory: {resolved_output_parent}")
+        sys.exit(1)
+    except OSError as e:
+        print(f"Error: Cannot create output directory: {resolved_output_parent} ({e})")
+        sys.exit(1)
+
+    # Perform the anonymization with detailed error handling
+    try:
         anonymize_pdf(input_path, output_path)
+    except PermissionError:
+        print(f"Error: Permission denied writing output file: {output_path}")
+        sys.exit(1)
+    except OSError as e:
+        if e.errno == errno.ENOSPC:
+            print(f"Error: Disk full - cannot write output file: {output_path}")
+        else:
+            print(f"Error: File system error: {e}")
+        sys.exit(1)
     except Exception as e:
         print(f"Error during anonymization: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()
