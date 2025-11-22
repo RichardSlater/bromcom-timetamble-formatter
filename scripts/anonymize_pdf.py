@@ -549,20 +549,7 @@ def main():
     except ValueError:
         print(f"Error: Output directory '{resolved_output_parent}' is outside the allowed base directory '{base_dir}'")
         sys.exit(1)
-    # Defense-in-depth: Check all ancestors up to base_dir for symlinks and containment
-    parent = resolved_output_parent
-    while True:
-        if parent.is_symlink():
-            print(f"Error: Symlink detected in output directory path component: '{parent}'. Refusing to create output directories.")
-            sys.exit(1)
-        try:
-            parent.relative_to(base_dir)
-        except ValueError:
-            print(f"Error: Output directory '{parent}' is outside the allowed base directory '{base_dir}'")
-            sys.exit(1)
-        if parent == base_dir:
-            break
-        parent = parent.parent
+    # Output directory already validated by sanitize_user_path(); create if needed
     try:
         resolved_output_parent.mkdir(parents=True, exist_ok=True)
     except PermissionError:
