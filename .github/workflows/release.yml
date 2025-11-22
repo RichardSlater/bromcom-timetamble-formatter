@@ -206,20 +206,23 @@ jobs:
         run: |
           set -euo pipefail
           echo "Using release tag: $RELEASE_TAG"
+
+          # Function to format commit authors: extract GitHub username from email or use name
+          format_authors() {
+            sed -E 's/@([^<]+) <([^@]+)@users\.noreply\.github\.com>/@\2/g' | \
+            sed -E 's/@([^<]+) <[^>]+>/@\1/g'
+          }
+
           # ensure tags are available
           git fetch --tags --prune || true
           # find previous tag by creation date (exclude current)
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${RELEASE_TAG}$" | head -n1 || true)
           if [ -n "$PREV_TAG" ]; then
             RANGE="$PREV_TAG..$RELEASE_TAG"
-            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$PREV_TAG..$RELEASE_TAG" | \
-              sed -E 's/@([^<]+) <([^@]+)@users\.noreply\.github\.com>/@\2/g' | \
-              sed -E 's/@([^<]+) <[^>]+>/@\1/g' || true)
+            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$PREV_TAG..$RELEASE_TAG" | format_authors || true)
           else
             RANGE="$RELEASE_TAG"
-            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$RELEASE_TAG" -n 50 | \
-              sed -E 's/@([^<]+) <([^@]+)@users\.noreply\.github\.com>/@\2/g' | \
-              sed -E 's/@([^<]+) <[^>]+>/@\1/g' || true)
+            COMMITS=$(git log --pretty=format:'- %h %s — @%aN <%aE>' "$RELEASE_TAG" -n 50 | format_authors || true)
           fi
           if [ -z "$COMMITS" ]; then
             COMMITS="(no commits found)"
