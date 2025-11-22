@@ -1,7 +1,7 @@
 ---
 mode: agent
 description: "Add educational comments to the file specified, or prompt asking for file to comment if one is not provided."
-tools: ["edit/editFiles", "fetch", "todos"]
+tools: ["runCommands", "runTasks", "extensions"]
 ---
 
 # Add Educational Comments
