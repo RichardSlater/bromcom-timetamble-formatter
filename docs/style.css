@@ -26,8 +26,7 @@
 
 /* Centralized dark theme variables - applied either by explicit data-theme="dark"
    or by system preference (prefers-color-scheme). This avoids duplication. */
-:root[data-theme="dark"],
-:root:not([data-theme="light"]) and (prefers-color-scheme: dark) {
+:root[data-theme="dark"] {
     --primary-color: #60a5fa;
     --secondary-color: #a78bfa;
     --accent-color: #fbbf24;
@@ -44,6 +43,27 @@
     --shadow-lg: 0 15px 30px -5px rgba(2, 6, 23, 0.9);
     --footer-bg: #020617;
     --footer-text: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --primary-color: #60a5fa;
+        --secondary-color: #a78bfa;
+        --accent-color: #fbbf24;
+        --text-primary: #f9fafb;
+        --text-secondary: #cbd5f5;
+        --bg-light: #1e293b;
+        --bg-white: #111827;
+        --page-bg: #020617;
+        --section-alt-bg: #0f172a;
+        --border-color: #334155;
+        --code-bg: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.6);
+        --shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.8);
+        --shadow-lg: 0 15px 30px -5px rgba(2, 6, 23, 0.9);
+        --footer-bg: #020617;
+        --footer-text: #f9fafb;
+    }
 }
 
 body {
