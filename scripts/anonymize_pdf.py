@@ -15,7 +15,6 @@ default. The base directory is auto-detected by searching upward for a
 """
 
 import argparse
-import errno
 import sys
 import re
 from pathlib import Path
