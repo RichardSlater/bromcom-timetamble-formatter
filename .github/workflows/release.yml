@@ -137,7 +137,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.use_cross == false && matrix.target || '' }}
 
       - name: Build (release)
         shell: bash
