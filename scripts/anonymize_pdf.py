@@ -365,12 +365,18 @@ def get_default_base_dir() -> Path:
     """
 
     candidate = Path(__file__).resolve()
-    for parent in [candidate] + list(candidate.parents):
+
+    # Check the candidate path itself first (avoid allocating a large list)
+    if (candidate / '.git').exists() or (candidate / 'Cargo.toml').exists():
+        return candidate
+
+    # Then walk upward through parents lazily
+    for parent in candidate.parents:
         if (parent / '.git').exists() or (parent / 'Cargo.toml').exists():
             return parent
 
     # Fallback: one level up from scripts/ if nothing obvious found
-    return Path(__file__).resolve().parents[1]
+    return candidate.parents[1]
 
 
 def sanitize_user_path(raw_path: str, base_dir: Path) -> Path:
