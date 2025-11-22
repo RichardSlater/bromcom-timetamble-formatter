@@ -491,21 +491,15 @@ def anonymize_pdf(input_path: Path, output_path: Path) -> None:
 
 def main():
     """Main entry point for the script."""
-    if len(sys.argv) != 3:
-        print("Usage: python3 anonymize_pdf.py <input_pdf> <output_pdf>")
-        print()
-        print("Example:")
-        print("  python3 scripts/anonymize_pdf.py \\")
-        print("    input/original.pdf \\")
-        print("    input/Sample_Student_Timetable.pdf")
-        sys.exit(1)
+    # Parse arguments using argparse for proper validation
+    args = parse_args()
 
-    # Get base directory and sanitize user-provided paths
-    base_dir = get_default_base_dir()
+    # Convert base_dir string to Path and sanitize user-provided paths
+    base_dir = Path(args.base_dir).resolve()
 
     try:
-        input_path = sanitize_user_path(sys.argv[1], base_dir)
-        output_path = sanitize_user_path(sys.argv[2], base_dir)
+        input_path = sanitize_user_path(args.input_pdf, base_dir)
+        output_path = sanitize_user_path(args.output_pdf, base_dir)
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)
@@ -524,7 +518,5 @@ def main():
         import traceback
         traceback.print_exc()
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

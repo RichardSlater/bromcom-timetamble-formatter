@@ -213,7 +213,7 @@ jobs:
           if [ -z "$COMMITS" ]; then
             COMMITS="(no commits found)"
           fi
-          printf "body<<EOF\nCommits in %s:\n%s\nEOF\n" "$RANGE" "$COMMITS" >> "$GITHUB_OUTPUT"
+          printf "body<<RELEASE_BODY_EOF\nCommits in %s:\n%s\nRELEASE_BODY_EOF\n" "$RANGE" "$COMMITS" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release and upload artifacts
         id: create_release
