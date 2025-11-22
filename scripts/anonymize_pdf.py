@@ -500,8 +500,15 @@ def main():
         print("    input/Sample_Student_Timetable.pdf")
         sys.exit(1)
 
-    input_path = Path(sys.argv[1])
-    output_path = Path(sys.argv[2])
+    # Get base directory and sanitize user-provided paths
+    base_dir = get_default_base_dir()
+
+    try:
+        input_path = sanitize_user_path(sys.argv[1], base_dir)
+        output_path = sanitize_user_path(sys.argv[2], base_dir)
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     if not input_path.exists():
         print(f"Error: Input file not found: {input_path}")

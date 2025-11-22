@@ -90,6 +90,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Install dependencies (Linux RISC-V)
         if: matrix.target == 'riscv64gc-unknown-linux-gnu'
@@ -189,6 +191,30 @@ jobs:
       - name: Show artifacts
         run: ls -la release_artifacts || true
 
+      - name: Generate release body
+        id: generate_release_body
+        # Compute commits included in this release and expose as `body` output
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "Using release tag: $RELEASE_TAG"
+          # ensure tags are available
+          git fetch --tags --prune || true
+          # find previous tag by creation date (exclude current)
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${RELEASE_TAG}$" | head -n1 || true)
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="$PREV_TAG..$RELEASE_TAG"
+            COMMITS=$(git log --pretty=format:'- %h %s — @%an <%ae>' "$PREV_TAG..$RELEASE_TAG" || true)
+          else
+            RANGE="$RELEASE_TAG"
+            COMMITS=$(git log --pretty=format:'- %h %s — @%an <%ae>' "$RELEASE_TAG" -n 50 || true)
+          fi
+          if [ -z "$COMMITS" ]; then
+            COMMITS="(no commits found)"
+          fi
+          printf "body<<EOF\nCommits in %s:\n%s\nEOF\n" "$RANGE" "$COMMITS" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub release and upload artifacts
         id: create_release
         # v2 of softprops/action-gh-release uses environment files instead of the deprecated set-output
@@ -196,6 +222,7 @@ jobs:
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
           name: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.release_name != '' && github.event.inputs.release_name || github.event.inputs.release_tag) || github.ref_name }}
+          body: ${{ steps.generate_release_body.outputs.body }}
           files: |
             release_artifacts/*/*.tar.gz
             release_artifacts/*/*.zip
