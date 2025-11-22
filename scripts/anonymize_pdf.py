@@ -503,15 +503,39 @@ def main():
     input_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2])
 
-    if not input_path.exists():
-        print(f"Error: Input file not found: {input_path}")
+    # Detect the base directory (repository root) by searching upward for .git or Cargo.toml
+    def detect_base_dir(start: Path) -> Path:
+        current = start.resolve()
+        for parent in [current] + list(current.parents):
+            if (parent / ".git").is_dir() or (parent / "Cargo.toml").exists():
+                return parent
+        return current  # fallback to current directory if neither found
+
+    # Use script location as starting point for repo root detection
+    script_dir = Path(__file__).parent
+    base_dir = detect_base_dir(script_dir)
+
+    # Resolve (normalize) paths to absolute paths and validate containment
+    input_resolved = input_path.resolve()
+    output_resolved = output_path.resolve()
+    try:
+        input_resolved.relative_to(base_dir)
+        output_resolved.relative_to(base_dir)
+    except ValueError:
+        print(f"Error: Both input and output files must be within the repository base directory: {base_dir}")
+        print(f" Provided input:  {input_resolved}")
+        print(f" Provided output: {output_resolved}")
+        sys.exit(1)
+
+    if not input_resolved.exists():
+        print(f"Error: Input file not found: {input_resolved}")
         sys.exit(1)
 
     # Create output directory if it doesn't exist
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_resolved.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        anonymize_pdf(input_path, output_path)
+        anonymize_pdf(input_resolved, output_resolved)
     except Exception as e:
         print(f"Error during anonymization: {e}")
         import traceback
