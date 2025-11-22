@@ -4,9 +4,18 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag to create (e.g. v0.1.0)'
+        required: false
+      release_name:
+        description: 'Optional release title'
+        required: false
+      publish_release:
+        description: 'Set to true to publish a GitHub release'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -133,10 +142,30 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_release == 'true' && github.event.inputs.release_tag != '')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Ensure release tag exists (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "release_tag input is required when publish_release is true"
+            exit 1
+          fi
+          git fetch --tags origin
+          if git rev-parse "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Tag $RELEASE_TAG already exists. Skipping creation."
+          else
+            git config user.name "${GITHUB_ACTOR}"
+            git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+            git tag -a "$RELEASE_TAG" -m "Release created via workflow dispatch"
+            git push origin "$RELEASE_TAG"
+          fi
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -151,6 +180,8 @@ jobs:
         # v2 of softprops/action-gh-release uses environment files instead of the deprecated set-output
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+          name: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.release_name != '' && github.event.inputs.release_name || github.event.inputs.release_tag) || github.ref_name }}
           files: |
             release_artifacts/*/*.tar.gz
             release_artifacts/*/*.zip
