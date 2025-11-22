@@ -15,6 +15,7 @@ default. The base directory is auto-detected by searching upward for a
 """
 
 import argparse
+import errno
 import sys
 import re
 from pathlib import Path
@@ -548,7 +549,7 @@ def main():
         print(f"Error: Permission denied writing output file: {output_path}")
         sys.exit(1)
     except OSError as e:
-        if e.errno == 28:  # ENOSPC - No space left on device
+        if e.errno == errno.ENOSPC:
             print(f"Error: Disk full - cannot write output file: {output_path}")
         else:
             print(f"Error: File system error: {e}")
