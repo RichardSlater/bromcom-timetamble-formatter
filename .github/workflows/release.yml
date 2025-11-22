@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: write
@@ -60,6 +60,60 @@ jobs:
           - os: ubuntu-latest
             name: freebsd-arm64
             target: aarch64-unknown-freebsd
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: macos-latest
+            name: macos-arm64
+            target: aarch64-apple-darwin
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: false
+          - os: ubuntu-latest
+            name: freebsd-riscv64
+            target: riscv64gc-unknown-freebsd
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: linux-musl-x86_64
+            target: x86_64-unknown-linux-musl
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: linux-musl-arm64
+            target: aarch64-unknown-linux-musl
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: linux-armv7
+            target: armv7-unknown-linux-gnueabihf
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: netbsd-x86_64
+            target: x86_64-unknown-netbsd
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: netbsd-arm64
+            target: aarch64-unknown-netbsd
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: openbsd-x86_64
+            target: x86_64-unknown-openbsd
+            archive_ext: tar.gz
+            bin_name: timetable_cli
+            use_cross: true
+          - os: ubuntu-latest
+            name: openbsd-arm64
+            target: aarch64-unknown-openbsd
             archive_ext: tar.gz
             bin_name: timetable_cli
             use_cross: true
