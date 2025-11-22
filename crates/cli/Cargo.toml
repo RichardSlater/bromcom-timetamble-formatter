@@ -2,6 +2,12 @@
 name = "timetable_cli"
 version = "0.1.0"
 edition = "2021"
+description = "Command-line tool for parsing Bromcom PDF timetables and generating formatted SVG visualizations"
+license = "MIT"
+repository = "https://github.com/RichardSlater/bromcom-timetable-formatter"
+authors = ["Richard Slater <richard@richard-slater.co.uk>"]
+keywords = ["pdf", "timetable", "svg", "bromcom", "cli"]
+categories = ["command-line-utilities", "visualization"]
 
 [dependencies]
 timetable_core = { path = "../core" }

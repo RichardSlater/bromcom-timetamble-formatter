@@ -1,3 +1,8 @@
+//! SVG timetable rendering with embedded maps.
+//!
+//! This module generates A4-sized SVG documents containing a formatted weekly
+//! timetable grid with color-coded cells and an embedded school map.
+
 use crate::config::Config;
 use crate::parser::Week;
 use std::fs;
@@ -6,12 +11,57 @@ use svg::node::element::{Group, Rectangle, Text};
 use svg::Document;
 use thiserror::Error;
 
+/// Errors that can occur during SVG rendering.
 #[derive(Error, Debug)]
 pub enum RenderError {
+    /// SVG file writing error
     #[error("SVG generation error: {0}")]
     Svg(#[from] std::io::Error),
 }
 
+/// Render a timetable week to an SVG file.
+///
+/// Generates an A4-sized (210mm × 297mm) SVG document containing:
+/// - A formatted timetable grid with student name, week identifier, and lessons
+/// - Color-coded cells based on room-to-department mappings
+/// - Break and lunch period rows
+/// - An embedded school map with highlighted departments
+///
+/// # Arguments
+///
+/// * `week` - The week data to render
+/// * `config` - Configuration for room mappings and styling
+/// * `map_content` - Processed SVG map content (from [`process_map`](crate::processor::process_map))
+/// * `output_path` - Path where the SVG file will be written
+///
+/// # Returns
+///
+/// `Ok(())` if the SVG was successfully generated and written.
+///
+/// # Errors
+///
+/// Returns [`RenderError`] if:
+/// - The output file cannot be created or written
+/// - The output directory doesn't exist
+///
+/// # Example
+///
+/// ```no_run
+/// use timetable_core::{config::Config, parser::{parse_pdf, Week}, renderer::render_timetable};
+/// use std::path::Path;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let config = Config::load(Path::new("config.toml"))?;
+/// let weeks = parse_pdf(Path::new("input/timetable.pdf"))?;
+/// let map_svg = "<svg></svg>"; // Processed map content
+///
+/// for (i, week) in weeks.iter().enumerate() {
+///     let output = format!("output/week_{}.svg", i + 1);
+///     render_timetable(week, &config, map_svg, Path::new(&output))?;
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub fn render_timetable(
     week: &Week,
     config: &Config,

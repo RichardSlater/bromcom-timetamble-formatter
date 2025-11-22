@@ -13,6 +13,57 @@ Thanks for helping make the timetable easier to read! Please review the guidance
   - Ubuntu: `sudo apt-get install gcc-riscv64-linux-gnu`
   - macOS: install Xcode Command Line Tools (`xcode-select --install`).
 
+### Pre-commit Hooks Setup
+
+This repository uses [pre-commit](https://pre-commit.com/) to enforce code quality checks automatically:
+
+**Installation** (requires Python):
+
+```bash
+pip install pre-commit
+```
+
+**Setup** (one-time per clone):
+
+```bash
+cd bromcom-timetable-formatter
+pre-commit install          # Run checks on git commit
+pre-commit install --hook-type pre-push  # Run tests on git push
+```
+
+**Configured Hooks**:
+
+- **On Commit**:
+  - YAML syntax validation
+  - Whitespace trimming (trailing whitespace, EOF newlines)
+  - `cargo fmt --all -- --check` (code formatting)
+  - `cargo clippy --all-targets --all-features -- -D warnings` (linting)
+
+- **On Push**:
+  - `cargo test --workspace` (all tests must pass)
+
+**Manual Execution**:
+
+```bash
+# Run all hooks on all files
+pre-commit run --all-files
+
+# Run specific hook
+pre-commit run cargo-fmt --all-files
+
+# Skip hooks for emergency commits (use sparingly)
+git commit --no-verify
+```
+
+**Note**: Clippy and test hooks can be slow (~30s-2min). Consider skipping with `--no-verify` for work-in-progress commits, but ensure they pass before pushing.
+
+### Why Pre-commit Hooks?
+
+- **Catches errors early**: Formatting and lint issues found locally, not in CI
+- **Consistency**: Everyone uses the same checks
+- **Faster CI**: Pre-validated commits mean fewer CI failures
+- **Better PR quality**: Reviewers focus on logic, not style
+
 ## Workflow Expectations
 
 1. **Fork and branch** from `main`. Use meaningful branch names (e.g. `feat/parser-lint`).

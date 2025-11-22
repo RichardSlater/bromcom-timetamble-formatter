@@ -2,6 +2,12 @@
 name = "timetable_core"
 version = "0.1.0"
 edition = "2021"
+description = "Core library for parsing Bromcom PDF timetables and generating formatted SVG visualizations with color-coded department maps"
+license = "MIT"
+repository = "https://github.com/RichardSlater/bromcom-timetable-formatter"
+authors = ["Richard Slater <richard@richard-slater.co.uk>"]
+keywords = ["pdf", "timetable", "svg", "bromcom", "education"]
+categories = ["parsing", "visualization"]
 
 [dependencies]
 lopdf = "0.38"

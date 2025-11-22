@@ -99,7 +99,7 @@ period = "L1"
 
 ### Layout Structure (Target Output)
 
-- **Header**: Student name and form (e.g., "Richard Slater (11RD)"), Week identifier
+- **Header**: Student name and form (e.g., "Alex Testington (11XX)"), Week identifier
 - **Grid**: 5 columns (Mon-Fri) × 6 rows (PD + L1-L5)
 - **Breaks**:
   - Break row after L2 (11:00-11:30)

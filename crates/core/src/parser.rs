@@ -1,36 +1,58 @@
+//! PDF parsing for Bromcom timetables.
+//!
+//! This module extracts text with coordinates from Bromcom PDF files and reconstructs
+//! the timetable grid structure using heuristics for day/period detection.
+
 use lopdf::{Document, Object};
 use regex::Regex;
 use std::path::Path;
 use thiserror::Error;
 
+/// Errors that can occur during PDF parsing.
 #[derive(Error, Debug)]
 pub enum ParserError {
+    /// PDF document parsing error
     #[error("PDF parsing error: {0}")]
     Pdf(#[from] lopdf::Error),
+    /// I/O error reading PDF file
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    /// Failed to extract text from PDF
     #[error("Failed to extract text from PDF")]
     ExtractionFailed,
 }
 
+/// A single lesson entry in the timetable.
 #[derive(Debug, Clone)]
 pub struct Lesson {
+    /// Subject name (e.g., "Mathematics", "French")
     pub subject: String,
+    /// Room code (e.g., "MA3", "SC8")
     pub room: String,
+    /// Teacher name (e.g., "Ms Test A", "Mr Test B")
     pub teacher: String,
+    /// Class code (e.g., "MA3", "HU9")
     pub class_code: String,
-    pub day_index: usize, // 0 = Monday
+    /// Day of week (0 = Monday, 4 = Friday)
+    pub day_index: usize,
+    /// Period index (0 = PD, 1 = L1, 2 = L2, etc.)
     pub period_index: usize,
 }
 
+/// A week of timetable data containing multiple lessons.
 #[derive(Debug, Clone)]
 pub struct Week {
+    /// All lessons for this week
     pub lessons: Vec<Lesson>,
-    pub week_name: String,            // e.g., "Week A"
-    pub student_name: Option<String>, // e.g., "Richard Slater"
-    pub form: Option<String>,         // e.g., "11RD"
+    /// Week identifier (e.g., "Week 1", "Week 2")
+    pub week_name: String,
+    /// Student name extracted from PDF (e.g., "Alex Testington")
+    pub student_name: Option<String>,
+    /// Form/class code (e.g., "11XX")
+    pub form: Option<String>,
 }
 
+/// Internal representation of text item with coordinates.
 #[derive(Debug, Clone)]
 struct TextItem {
     x: f64,
@@ -38,6 +60,41 @@ struct TextItem {
     text: String,
 }
 
+/// Parse a Bromcom PDF timetable file.
+///
+/// Extracts text with coordinates from each page and reconstructs the timetable grid
+/// by detecting week boundaries, day columns, and period rows.
+///
+/// # Arguments
+///
+/// * `path` - Path to the Bromcom PDF file
+///
+/// # Returns
+///
+/// A vector of [`Week`] structures, one for each week found in the PDF.
+///
+/// # Errors
+///
+/// Returns [`ParserError`] if:
+/// - The PDF file cannot be opened or read
+/// - The PDF structure is invalid
+/// - Text extraction fails
+///
+/// # Example
+///
+/// ```no_run
+/// use timetable_core::parser::parse_pdf;
+/// use std::path::Path;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let weeks = parse_pdf(Path::new("input/timetable.pdf"))?;
+/// println!("Found {} weeks", weeks.len());
+/// for week in weeks {
+///     println!("{}  has {} lessons", week.week_name, week.lessons.len());
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub fn parse_pdf(path: &Path) -> Result<Vec<Week>, ParserError> {
     let doc = Document::load(path)?;
     let mut weeks = Vec::new();
@@ -573,34 +630,34 @@ mod tests {
 
     #[test]
     fn extract_student_info_parens() {
-        let src = [make_item(10.0, 10.0, "Richard Slater (11RD)")];
+        let src = [make_item(10.0, 10.0, "Alex Testington (11XX)")];
         let items: Vec<&TextItem> = src.iter().collect();
 
         let (name, form) = extract_student_info(&items);
-        assert_eq!(name.unwrap(), "Richard Slater");
-        assert_eq!(form.unwrap(), "11RD");
+        assert_eq!(name.unwrap(), "Alex Testington");
+        assert_eq!(form.unwrap(), "11XX");
     }
 
     #[test]
     fn extract_student_info_separate() {
         let src = [
-            make_item(10.0, 10.0, "Richard Slater"),
-            make_item(10.0, 12.0, "11RD"),
+            make_item(10.0, 10.0, "Alex Testington"),
+            make_item(10.0, 12.0, "11XX"),
         ];
         let items: Vec<&TextItem> = src.iter().collect();
 
         let (name, form) = extract_student_info(&items);
-        assert_eq!(name.unwrap(), "Richard Slater");
-        assert_eq!(form.unwrap(), "11RD");
+        assert_eq!(name.unwrap(), "Alex Testington");
+        assert_eq!(form.unwrap(), "11XX");
     }
 
     #[test]
     fn extract_student_info_parens_numeric() {
-        let src = [make_item(10.0, 10.0, "Richard Slater (917)")];
+        let src = [make_item(10.0, 10.0, "Alex Testington (917)")];
         let items: Vec<&TextItem> = src.iter().collect();
 
         let (name, form) = extract_student_info(&items);
-        assert_eq!(name.unwrap(), "Richard Slater");
+        assert_eq!(name.unwrap(), "Alex Testington");
         assert_eq!(form.unwrap(), "917");
     }
 

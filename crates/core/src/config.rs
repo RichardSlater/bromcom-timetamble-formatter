@@ -1,12 +1,20 @@
+//! Configuration management for timetable formatting.
+//!
+//! This module handles loading TOML configuration files, managing room-to-department
+//! mappings, and applying lesson overrides.
+
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
 use thiserror::Error;
 
+/// Errors that can occur during configuration operations.
 #[derive(Error, Debug)]
 pub enum ConfigError {
+    /// I/O error reading configuration file
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    /// TOML parsing error
     #[error("TOML parsing error: {0}")]
     Toml(#[from] toml::de::Error),
 }
@@ -90,32 +98,58 @@ mod tests {
     }
 }
 
+/// Configuration for timetable formatting and room mappings.
+///
+/// Loaded from a TOML file containing room-to-department mappings and
+/// optional per-lesson overrides.
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    /// Room-to-department mapping rules
     pub mappings: Vec<Mapping>,
+    /// Per-week/day/period lesson overrides
     #[serde(default)]
     pub overrides: Vec<Override>,
 }
 
+/// Maps a room code prefix to visual styling and map element.
+///
+/// Used to color-code timetable cells and highlight map regions
+/// based on the room where a lesson takes place.
 #[derive(Debug, Deserialize)]
 pub struct Mapping {
+    /// Room code prefix to match (e.g., "MA" matches MA1, MA2, MA3, etc.)
     pub prefix: String,
+    /// Background color for cell and map (hex code, e.g., "#fcdcd8")
     #[serde(alias = "color")]
     pub bg_color: String,
+    /// Foreground/text color for labels (hex code, defaults to "#231f20")
     #[serde(default = "default_fg_color")]
     pub fg_color: String,
+    /// SVG element ID in map file to highlight
     pub map_id: String,
+    /// Human-readable department label (e.g., "Maths", "Science")
     pub label: Option<String>,
 }
 
+/// Override for a specific lesson in the timetable.
+///
+/// Allows correcting parsing errors or making manual adjustments
+/// to specific lessons by week, day, and period.
 #[derive(Debug, Deserialize, Clone)]
 pub struct Override {
-    pub week: usize,    // Week number (1-based)
-    pub day: String,    // "Monday", "Tuesday", etc.
-    pub period: String, // "PD", "L1", "L2", etc.
+    /// Week number (1-based, e.g., 1 = Week 1, 2 = Week 2)
+    pub week: usize,
+    /// Day name ("Monday", "Tuesday", etc. or abbreviated "Mon", "Tue")
+    pub day: String,
+    /// Period identifier ("PD", "L1", "L2", "L3", "L4", "L5")
+    pub period: String,
+    /// Override subject name (optional)
     pub subject: Option<String>,
+    /// Override room code (optional)
     pub room: Option<String>,
+    /// Override teacher name (optional)
     pub teacher: Option<String>,
+    /// Override class code (optional)
     pub class_code: Option<String>,
 }
 
@@ -124,12 +158,68 @@ fn default_fg_color() -> String {
 }
 
 impl Config {
+    /// Load configuration from a TOML file.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the config.toml file
+    ///
+    /// # Returns
+    ///
+    /// A parsed [`Config`] structure.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ConfigError`] if:
+    /// - The file cannot be read
+    /// - The TOML syntax is invalid
+    /// - Required fields are missing
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use timetable_core::config::Config;
+    /// use std::path::Path;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = Config::load(Path::new("config.toml"))?;
+    /// println!("Loaded {} room mappings", config.mappings.len());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn load(path: &Path) -> Result<Self, ConfigError> {
         let content = fs::read_to_string(path)?;
         let config: Config = toml::from_str(&content)?;
         Ok(config)
     }
 
+    /// Find the mapping for a given room code.
+    ///
+    /// Returns the mapping with the longest matching prefix, allowing
+    /// specific overrides (e.g., "MA" matches "MA3" but "MA1" would match
+    /// a more specific "MA1" prefix if configured).
+    ///
+    /// # Arguments
+    ///
+    /// * `room_code` - Room code to look up (e.g., "MA3", "SC8")
+    ///
+    /// # Returns
+    ///
+    /// The matching [`Mapping`], or `None` if no prefix matches.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use timetable_core::config::Config;
+    /// # use std::path::Path;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// # let config = Config::load(Path::new("config.toml"))?;
+    /// if let Some(mapping) = config.get_style_for_room("MA3") {
+    ///     println!("Room MA3 maps to: {}", mapping.map_id);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get_style_for_room(&self, room_code: &str) -> Option<&Mapping> {
         // Find the longest matching prefix
         self.mappings
@@ -138,6 +228,36 @@ impl Config {
             .max_by_key(|m| m.prefix.len())
     }
 
+    /// Apply configured overrides to parsed weeks.
+    ///
+    /// Modifies lessons in-place based on override rules. Each override
+    /// specifies a week, day, and period, and can update any combination
+    /// of subject, room, teacher, or class code.
+    ///
+    /// # Arguments
+    ///
+    /// * `weeks` - Mutable slice of week data to modify
+    ///
+    /// # Warnings
+    ///
+    /// Prints warnings to stderr if:
+    /// - Week number is out of range
+    /// - Day or period name is invalid
+    /// - No matching lesson is found for an override
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use timetable_core::{config::Config, parser::parse_pdf};
+    /// # use std::path::Path;
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = Config::load(Path::new("config.toml"))?;
+    /// let mut weeks = parse_pdf(Path::new("input/timetable.pdf"))?;
+    /// 
+    /// config.apply_overrides(&mut weeks);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn apply_overrides(&self, weeks: &mut [crate::parser::Week]) {
         for override_rule in &self.overrides {
             // Find the target week (1-based index)

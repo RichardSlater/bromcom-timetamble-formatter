@@ -26,11 +26,11 @@ struct Cli {
     #[arg(short, long)]
     output: PathBuf,
 
-    /// Student name (optional, e.g., "Richard Slater")
+    /// Student name (optional, e.g., "Alex Testington")
     #[arg(short, long)]
     student_name: Option<String>,
 
-    /// Student form/class (optional, e.g., "11RD")
+    /// Student form/class (optional, e.g., "11XX")
     #[arg(short, long)]
     form: Option<String>,
 }

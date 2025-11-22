@@ -1,24 +1,81 @@
+//! SVG map processing and department highlighting.
+//!
+//! This module manipulates school map SVG files by finding elements matching
+//! department IDs and applying color fills to highlight them.
+
 use regex::Regex;
 use roxmltree::Document;
 use std::fs;
 use std::path::Path;
 use thiserror::Error;
 
+/// Errors that can occur during map processing.
 #[derive(Error, Debug)]
 pub enum ProcessorError {
+    /// XML/SVG parsing error
     #[error("XML parsing error: {0}")]
     Xml(#[from] roxmltree::Error),
+    /// I/O error reading map file
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    /// Regex compilation error
     #[error("Regex error: {0}")]
     Regex(#[from] regex::Error),
 }
 
+/// Represents a department to highlight on the map.
+#[derive(Clone)]
 pub struct MapHighlight {
+    /// SVG element ID or data-name attribute to match
     pub id: String,
+    /// Hex color code to apply (e.g., "#fcdcd8")
     pub color: String,
 }
 
+/// Process a school map SVG file and apply department highlights.
+///
+/// Loads an SVG map file, finds elements matching the provided highlight IDs,
+/// and injects fill attributes with the specified colors.
+///
+/// # Arguments
+///
+/// * `path` - Path to the school map SVG file
+/// * `highlights` - Vector of department highlights to apply
+///
+/// # Returns
+///
+/// The modified SVG content as a string with highlights applied.
+///
+/// # Errors
+///
+/// Returns [`ProcessorError`] if:
+/// - The map file cannot be read
+/// - The SVG XML is malformed
+/// - Regex patterns are invalid
+///
+/// # Example
+///
+/// ```no_run
+/// use timetable_core::processor::{process_map, MapHighlight};
+/// use std::path::Path;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let highlights = vec![
+///     MapHighlight {
+///         id: "Maths_Rooms".to_string(),
+///         color: "#fcdcd8".to_string(),
+///     },
+///     MapHighlight {
+///         id: "Science_Rooms".to_string(),
+///         color: "#fad7e6".to_string(),
+///     },
+/// ];
+///
+/// let map_svg = process_map(Path::new("resources/map.svg"), &highlights)?;
+/// println!("Processed map: {} bytes", map_svg.len());
+/// # Ok(())
+/// # }
+/// ```
 pub fn process_map(path: &Path, highlights: &[MapHighlight]) -> Result<String, ProcessorError> {
     let content = fs::read_to_string(path)?;
     let doc = Document::parse(&content)?;

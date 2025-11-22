@@ -1,80 +1,123 @@
+# Bromcom Timetable Formatter Configuration
+#
+# This file maps room code prefixes to department colors and map locations,
+# and allows manual overrides for specific lessons.
+
+# ============================================================================
+# ROOM MAPPINGS
+# ============================================================================
+# Each [[mappings]] section defines how rooms with a specific prefix are styled.
+#
+# Fields:
+#   prefix    - Room code prefix to match (e.g., "MA" matches MA1, MA2, MA3, etc.)
+#               Case-sensitive. Longer prefixes take precedence (MA1 > MA).
+#   bg_color  - Background color (hex) for timetable cell and map highlight
+#               Example: "#fcdcd8" (light pink)
+#   fg_color  - Foreground/text color (hex) for class code labels
+#               Example: "#f0503f" (darker red)
+#               Optional - defaults to "#231f20" (dark gray) if omitted
+#   map_id    - SVG element ID in your school map file to highlight
+#               Must match 'id' or 'data-name' attribute in map SVG
+#   label     - Human-readable department name for reference
+#               Optional - used in logs and future features
+
 [[mappings]]
-prefix = "MA"
-bg_color = "#fcdcd8"
-fg_color = "#f0503f"
-map_id = "Maths_Rooms"
+prefix = "MA"              # Maths rooms (MA1, MA2, MA3, etc.)
+bg_color = "#fcdcd8"       # Light pink background
+fg_color = "#f0503f"       # Red text
+map_id = "Maths_Rooms"     # Must match element in school map SVG
 label = "Maths"
 
 [[mappings]]
-prefix = "EN"
-bg_color = "#daeaf6"
-fg_color = "#4799d4"
+prefix = "EN"              # English rooms
+bg_color = "#daeaf6"       # Light blue background
+fg_color = "#4799d4"       # Dark blue text
 map_id = "English_Rooms"
 label = "English"
 
 [[mappings]]
-prefix = "SC"
-bg_color = "#fad7e6"
-fg_color = "#e93982"
+prefix = "SC"              # Science rooms
+bg_color = "#fad7e6"       # Light magenta background
+fg_color = "#e93982"       # Magenta text
 map_id = "Science_Rooms"
 label = "Science"
 
 [[mappings]]
-prefix = "HU"
-bg_color = "#faeed2"
-fg_color = "#e8c570"
+prefix = "HU"              # Humanities rooms (History, Geography, etc.)
+bg_color = "#faeed2"       # Light yellow background
+fg_color = "#e8c570"       # Gold text
 map_id = "Humanities_Rooms"
 label = "Humanities"
 
 [[mappings]]
-prefix = "IT"
-bg_color = "#bfbecc"
-fg_color = "#151640"
+prefix = "IT"              # IT/Computing rooms
+bg_color = "#bfbecc"       # Light purple background
+fg_color = "#151640"       # Dark purple text
 map_id = "IT_Rooms"
 label = "IT"
 
 [[mappings]]
-prefix = "LA"
-bg_color = "#edf4e5"
-fg_color = "#b8d666"
+prefix = "LA"              # Language rooms (French, Spanish, etc.)
+bg_color = "#edf4e5"       # Light green background
+fg_color = "#b8d666"       # Green text
 map_id = "Languages_Rooms"
 label = "Languages"
 
 [[mappings]]
-prefix = "MU"
-bg_color = "#b9a9bb"
-fg_color = "#8d3d97"
-map_id = "Music_x2C_Art_x2C_DT_x26_FT_Rooms"
+prefix = "MU"              # Music rooms
+bg_color = "#b9a9bb"       # Light purple background
+fg_color = "#8d3d97"       # Dark purple text
+map_id = "Music_x2C_Art_x2C_DT_x26_FT_Rooms"  # Shared arts block
 label = "Music"
 
 [[mappings]]
-prefix = "AR"
+prefix = "AR"              # Art rooms
 bg_color = "#b9a9bb"
 fg_color = "#8d3d97"
 map_id = "Music_x2C_Art_x2C_DT_x26_FT_Rooms"
 label = "Art"
 
 [[mappings]]
-prefix = "DT"
+prefix = "DT"              # Design Technology rooms
 bg_color = "#b9a9bb"
 fg_color = "#8d3d97"
 map_id = "Music_x2C_Art_x2C_DT_x26_FT_Rooms"
 label = "DT"
 
 [[mappings]]
-prefix = "FT"
+prefix = "FT"              # Food Technology rooms
 bg_color = "#b9a9bb"
 fg_color = "#8d3d97"
 map_id = "Music_x2C_Art_x2C_DT_x26_FT_Rooms"
 label = "Food Tech"
 
-# Week 1 overrides
+# ============================================================================
+# LESSON OVERRIDES
+# ============================================================================
+# Use [[overrides]] to correct parsing errors or make manual adjustments.
+# Each override targets a specific lesson by week, day, and period.
+#
+# Fields:
+#   week        - Week number (1-based). Week 1, Week 2, etc.
+#   day         - Day name: "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+#                 Abbreviations work: "Mon", "Tue", "Wed", "Thu", "Fri"
+#                 Case-insensitive
+#   period      - Period identifier: "PD", "L1", "L2", "L3", "L4", "L5"
+#   subject     - (Optional) Override subject name
+#   room        - (Optional) Override room code
+#   teacher     - (Optional) Override teacher name
+#   class_code  - (Optional) Override class code
+#
+# Only the fields you specify will be changed - others remain from the PDF.
+# If no matching lesson is found, a warning is printed to the console.
+
+# Week 1 overrides - Correct parsing errors in science rooms
 [[overrides]]
-week = 1
-day = "Thursday"
+week = 1                   # Week 1
+day = "Thursday"           # Thursday, L1
 period = "L1"
-room = "SC6"
-class_code = "SC6"
+room = "SC6"               # Correct room to SC6
+class_code = "SC6"         # Update class code to match
 
 [[overrides]]
 week = 1
@@ -92,8 +135,8 @@ class_code = "SC3"
 
 # Week 2 overrides
 [[overrides]]
-week = 2
-day = "Monday"
+week = 2                   # Week 2
+day = "Monday"             # Monday, L2
 period = "L2"
 room = "SC8"
 class_code = "SC8"
