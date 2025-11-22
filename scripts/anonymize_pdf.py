@@ -7,27 +7,35 @@ names with clearly fictional alternatives. It uses pikepdf to manipulate PDF
 content streams.
 
 Usage:
-    python3 scripts/anonymize_pdf.py input/original.pdf input/anonymized.pdf
+    python3 scripts/anonymize_pdf.py input/original.pdf input/anonymized.pdf \
+    args = parse_args()
+    base_dir = Path(args.base_dir).resolve()
 
-Dependencies:
-    pip install pikepdf
+    if not base_dir.exists():
+        print(f"Error: Base directory does not exist: {base_dir}")
+        sys.exit(1)
 
-The script automatically detects teacher names (Mr/Ms/Mrs/Miss + surname) and
-student names, replacing them with test fixtures while preserving character
-counts for PDF structure integrity.
-"""
+    try:
+        input_path = sanitize_user_path(args.input_pdf, base_dir)
+        output_path = sanitize_user_path(args.output_pdf, base_dir)
+    except ValueError as exc:
+        print(f"Error: {exc}")
+        sys.exit(1)
 
-import sys
-import re
-from pathlib import Path
-from collections import defaultdict
-from typing import Dict, Set
+    if not input_path.exists():
+        print(f"Error: Input file not found: {input_path}")
+        sys.exit(1)
 
-try:
-    import pikepdf
-except ImportError:
-    print("Error: pikepdf is required. Install it with: pip install pikepdf")
-    sys.exit(1)
+    # Create output directory if it doesn't exist
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        anonymize_pdf(input_path, output_path)
+    except Exception as e:
+        print(f"Error during anonymization: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 # Test fixture name generators
@@ -356,6 +364,62 @@ def extract_text_from_pdf(pdf: pikepdf.Pdf) -> str:
 
     # Re-encode
     return text.encode('latin-1', errors='ignore')
+
+
+def get_default_base_dir() -> Path:
+    """Return the repository root (default base directory for sanitized paths)."""
+    return Path(__file__).resolve().parents[1]
+
+
+def sanitize_user_path(raw_path: str, base_dir: Path) -> Path:
+    """Resolve user-supplied paths relative to a trusted base directory.
+
+    Validates that the resolved path is located within the base directory to
+    prevent path traversal and unintended access outside the workspace.
+    """
+
+    resolved_base = base_dir.resolve()
+    candidate = Path(raw_path)
+
+    if candidate.is_absolute():
+        resolved_candidate = candidate.resolve()
+    else:
+        resolved_candidate = (resolved_base / candidate).resolve()
+
+    try:
+        resolved_candidate.relative_to(resolved_base)
+    except ValueError as exc:
+        raise ValueError(
+            f"Path '{resolved_candidate}' is outside the allowed base directory {resolved_base}"
+        ) from exc
+
+    return resolved_candidate
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for the anonymizer script."""
+
+    parser = argparse.ArgumentParser(
+        description="Anonymize Bromcom PDFs while keeping file access within a trusted directory."
+    )
+    parser.add_argument(
+        "input_pdf",
+        help="Path to the original PDF (relative to --base-dir unless absolute within it)",
+    )
+    parser.add_argument(
+        "output_pdf",
+        help="Path where the anonymized PDF will be written (relative to --base-dir)",
+    )
+    parser.add_argument(
+        "--base-dir",
+        default=str(get_default_base_dir()),
+        help=(
+            "Trusted base directory that user-supplied paths must reside in. "
+            "Defaults to the repository root."
+        ),
+    )
+
+    return parser.parse_args()
 
 
 def anonymize_pdf(input_path: Path, output_path: Path) -> None:
